@@ -24,6 +24,7 @@ def index():
     _sounds = sounds()
     return render_template('index.html', sounds=_sounds, no_sounds=(0 == len(_sounds)))
 
+@server.route('/test')
 def test():
     [ user, password ] = get_cred
     cmd = [ 'sshpass', '-p', password, 'ssh',
