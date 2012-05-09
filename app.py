@@ -21,12 +21,5 @@ def test():
     p = subprocess.call(['ls'])
     return 'OK'
 
-def get_cred():
-    global cred
-    cred['user'] = os.environ['USER'] + '@horsy'
-    cred['password'] = os.environ['PASSWORD']
-
-    return [ cred['user'], cred['password'] ]
-
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug = True)
