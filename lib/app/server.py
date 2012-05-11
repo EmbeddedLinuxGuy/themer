@@ -1,6 +1,8 @@
 from flask import Flask
 from flask import render_template
 from flask import url_for
+from flask import request
+
 import subprocess
 import os
 import app.constant
@@ -26,9 +28,14 @@ def index():
     return render_template('index.html', sounds=_sounds, no_sounds=(0 == len(_sounds)))
 
 
-@server.route('/setpattern')
+@server.route('/setpattern', methods=['POST', 'GET'])
 def setpattern():
-    filename = 'tinkle.wav'
+    filename = "tinkle.wav"
+    if request.method == 'POST':
+        if request.form['filename']:
+            filename = request.form['filename']
+        else:
+            return "noneoftheabove"
     cmd = [ 'ssh', '-i', '/home/jesse/.ssh/id_dsa',
             'doorbell@minotaur', 'ln -sf ' + filename + ' ',
             'chime/default.wav' ]
@@ -36,18 +43,14 @@ def setpattern():
     p = subprocess.call(cmd)
     return filename
 
-@server.route('/test')
-def test():
-#    [ user, password ] = get_cred()
-#    cmd = [ 'sshpass', '-p', password, 'ssh',
-#            '-o', 'StrictHostKeyChecking=no',
-#            '-o', 'UserKnownHostsFile=/dev/null',
-#            user, 'mpg123 chime.mp3' ]
+@server.route('/setuser')
+def setuser():
+    number = 1111
+    identity = "froolish"
+    sound = 'duul.wav'
+    cmd = [ 'ssh', '-i', '/home/jesse/.ssh/id_dsa', 'doorbell@minotaur',
+            'echo ' + number + ' # ' + identity + ' # ' + sound ]
 
-    cmd = [ 'ssh', '-i', '/home/jesse/.ssh/id_dsa',
-            'doorbell@minotaur', 'touch kilroy-was-here' ]
-
-    p = subprocess.call(cmd)
     return 'OK'
 
 def get_cred():
