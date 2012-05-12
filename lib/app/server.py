@@ -3,7 +3,7 @@ from flask import render_template
 from flask import url_for
 from flask import request
 
-import subprocess
+import paramiko
 import os
 import app.constant
 from app.sound import Sound
@@ -36,11 +36,21 @@ def setpattern():
             filename = request.form['filename']
         else:
             return "noneoftheabove"
-    cmd = [ 'ssh', '-i', '/home/jesse/.ssh/id_dsa',
-            'doorbell@minotaur', 'ln -sf ' + filename + ' ',
-            'chime/default.wav' ]
 
-    p = subprocess.call(cmd)
+    # params for SSH connection
+    privatekeyfile = '/home/jesse/.ssh/id_dsa'
+    cmd = 'ln -sf ' + filename + ' ' + 'chime/default.wav'
+    host = 'minotaur'
+    user = 'doorbell'
+
+    # SSH Connection
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    mykey = paramiko.DSSKey.from_private_key_file(privatekeyfile)
+    ssh.connect(host, username = user , pkey = mykey)
+    stdin, stdout, stderr = ssh.exec_command(cmd)
+    ssh.close()
+
     return filename
 
 @server.route('/setuser')
@@ -48,8 +58,20 @@ def setuser():
     number = 1111
     identity = "froolish"
     sound = 'duul.wav'
-    cmd = [ 'ssh', '-i', '/home/jesse/.ssh/id_dsa', 'doorbell@minotaur',
-            'echo ' + number + ' # ' + identity + ' # ' + sound ]
+
+    # params for SSH connection
+    privatekeyfile = '/home/jesse/.ssh/id_dsa'
+    cmd = 'echo ' + number + ' # ' + identity + ' # ' + sound
+    host = 'minotaur'
+    user = 'doorbell'
+
+    # SSH Connection
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    mykey = paramiko.DSSKey.from_private_key_file(privatekeyfile)
+    ssh.connect(host, username = user, pkey = mykey)
+    stdin, stdout, stderr = ssh.exec_command(cmd)
+    ssh.close()
 
     return 'OK'
 
